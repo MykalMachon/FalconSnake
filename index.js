@@ -24,7 +24,8 @@ app.use(poweredByHandler);
 // --- SNAKE LOGIC GOES BELOW THIS LINE ---
 const state = {
   GameID: '',
-  snakeColor: '',
+  snakeName: 'FalconSnake',
+  snakeColor: '#B5BABE',
   snakeAvatar: '',
   currBody: '',
   currBoard: '',
@@ -40,7 +41,7 @@ app.post('/start', (request, response) => {
   state.currBody = request.body.you.body;
   // Response data
   const data = {
-    color: '#EC0868'
+    color: '#B5BABE'
   };
 
   return response.json(data);
@@ -52,6 +53,7 @@ app.post('/move', (request, response) => {
   const data = {};
   // * Set new state for turn
   state.currBody = request.body.you.body;
+  state.currBoard = request.body.board;
   state.currHead = state.currBody[0];
   state.currTail = state.currBody[state.currBody.length - 1];
   // * Pathfinding AI

@@ -14,8 +14,8 @@ const spin = prevMove => {
 // * This function will take in the board and determine what immediate moves are safe
 // * this will return all safe next moves for the snake
 const findSafeMoves = state => {
-  const { currHead, currBoard, currBody, currTail } = state;
-
+  const { currHead, currBoard, currBody, currTail, snakeName } = state;
+  console.log(`Find Safe Moves Called`);
   //* Up, Right, Down, Left
   const possibleMoves = [
     { direction: 'up', x: currHead.x, y: currHead.y - 1 },
@@ -47,7 +47,20 @@ const findSafeMoves = state => {
   });
   // * Checks if moves into others body
   const filterOutOthers = filterOutSelf.filter(opt => {
-    return true;
+    let isOther = false;
+    // Get snakes that aren't itself
+    const otherSnakes = currBoard.snakes.filter(
+      boardSnake => boardSnake.name != snakeName
+    );
+    // Checks if moves into another snakes body
+    otherSnakes.forEach(otherSnake => {
+      otherSnake.body.forEach(bodyPos => {
+        if (bodyPos.x == opt.x && bodyPos.y == opt.y) {
+          isOther = true;
+        }
+      });
+    });
+    return !isOther;
   });
   return filterOutOthers;
 };
