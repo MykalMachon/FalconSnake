@@ -41,7 +41,7 @@ app.post('/start', (request, response) => {
   state.currBody = request.body.you.body;
   // Response data
   const data = {
-    color: '#B5BABE',
+    color: '#ff69b4',
     headType: 'pixel',
     tailType: 'pixel'
   };
