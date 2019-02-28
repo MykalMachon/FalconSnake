@@ -54,7 +54,7 @@ const findSafeMoves = state => {
     );
     // Checks if moves into another snakes body
     otherSnakes.forEach(otherSnake => {
-      otherSnake.body.forEach(bodyPos, index => {
+      otherSnake.body.forEach((bodyPos, index) => {
         if (bodyPos.x == opt.x && bodyPos.y == opt.y) {
           isOther = true;
         }
