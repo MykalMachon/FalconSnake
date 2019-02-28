@@ -6,10 +6,10 @@ const {
   fallbackHandler,
   notFoundHandler,
   genericErrorHandler,
-  poweredByHandler
+  poweredByHandler,
 } = require('./handlers.js');
 
-const { spin, findSafeMoves } = require('./pathfinding.js');
+const { spin, findSafeMoves, closestFood } = require('./pathfinding.js');
 
 // For deployment to Heroku, the port needs to be set using ENV, so
 // we check for the port number in process.env
@@ -31,7 +31,7 @@ const state = {
   currBoard: '',
   currHead: '',
   currTail: '',
-  prevMove: 'left'
+  prevMove: 'left',
 };
 
 // Handle POST request to '/start'
@@ -43,7 +43,7 @@ app.post('/start', (request, response) => {
   const data = {
     color: '#ff69b4',
     headType: 'pixel',
-    tailType: 'pixel'
+    tailType: 'pixel',
   };
 
   return response.json(data);
@@ -69,6 +69,7 @@ app.post('/move', (request, response) => {
   validMoves.forEach(o => {
     validMovesString += `${o.direction}, `;
   });
+  closestFood(state);
   console.log(`Current Turn: ${request.body.turn}`);
   console.log(`Valid Directions: ${validMovesString}`);
   return response.json(data);
