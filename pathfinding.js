@@ -15,7 +15,6 @@ const spin = prevMove => {
 // * this will return all safe next moves for the snake
 const findSafeMoves = state => {
   const { currHead, currBoard, currBody, currTail, snakeName } = state;
-  console.log(`Find Safe Moves Called`);
   //* Up, Right, Down, Left
   const possibleMoves = [
     { direction: 'up', x: currHead.x, y: currHead.y - 1 },
@@ -50,9 +49,7 @@ const findSafeMoves = state => {
     let isOther = false;
     // Get snakes that aren't itself
     //! CAUSES SOME ISSUES
-    const otherSnakes = currBoard.snakes.filter(
-      boardSnake => boardSnake.name != snakeName
-    );
+    const otherSnakes = currBoard.snakes;
     // Checks if moves into another snakes body
     otherSnakes.forEach(otherSnake => {
       otherSnake.body.forEach(bodyPos => {
@@ -63,7 +60,6 @@ const findSafeMoves = state => {
     });
     return !isOther;
   });
-  console.log(filterOutOthers);
   return filterOutOthers;
 };
 
@@ -129,9 +125,7 @@ const closestFood = state => {
       return 0;
     }
   });
-  console.log('Current Food Positions');
-  console.log(FoodPositions);
-  // parse y co-ords
+  return FoodPositions;
 };
 
 module.exports = {

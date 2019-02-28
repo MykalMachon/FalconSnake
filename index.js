@@ -50,7 +50,7 @@ app.post('/start', (request, response) => {
 });
 
 // Handle POST request to '/move'
-app.post('/move', (request, response) => {
+app.post('/move', async (request, response) => {
   // * Initialize Data Value
   const data = {};
   // * Set new state for turn
@@ -60,18 +60,41 @@ app.post('/move', (request, response) => {
   state.currTail = state.currBody[state.currBody.length - 1];
   // * Pathfinding AI
   const validMoves = findSafeMoves(state);
-  data.move =
+  const foodMoves = closestFood(state);
+  let foundPreferedMove = false;
+  let preferedMove;
+  for (let i = 0; i < validMoves.length && !foundPreferedMove; i++) {
+    for (let z = 0; z < foodMoves.length; z++) {
+      if (validMoves[i].direction == foodMoves[z].direction) {
+        preferedMove = validMoves[i].direction;
+        foundPreferedMove = true;
+      }
+    }
+  }
+
+  const fallbackMove =
     validMoves[Math.floor(Math.random() * validMoves.length)].direction;
+
+  if (preferedMove) {
+    data.move = preferedMove;
+  } else {
+    data.move = fallbackMove;
+  }
   // * Set Previous Move to Current Move
   state.prevMove = data.move;
   // * Return Data
   let validMovesString = '';
+  let foodMovesString = '';
   validMoves.forEach(o => {
     validMovesString += `${o.direction}, `;
   });
-  closestFood(state);
+  foodMoves.forEach(o => {
+    foodMovesString += `${o.direction}, `;
+  });
   console.log(`Current Turn: ${request.body.turn}`);
   console.log(`Valid Directions: ${validMovesString}`);
+  console.log(`Food Directions: ${foodMovesString}`);
+
   return response.json(data);
 });
 
