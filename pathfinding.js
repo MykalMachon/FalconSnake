@@ -54,7 +54,7 @@ const findSafeMoves = state => {
     );
     // Checks if moves into another snakes body
     otherSnakes.forEach(otherSnake => {
-      otherSnake.body.forEach(bodyPos, index => {
+      otherSnake.body.forEach((bodyPos, index) => {
         if (index == 0) {
           // Checks if the head is at a diagonal.
           if (opt.x == (bodyPos.x + 1 || bodyPos.x - 1)) {
