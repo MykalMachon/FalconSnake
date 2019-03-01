@@ -1,16 +1,3 @@
-// * This function just spins the snake in place
-const spin = prevMove => {
-  if (prevMove == 'right') {
-    return 'down';
-  } else if (prevMove == 'left') {
-    return 'up';
-  } else if (prevMove == 'up') {
-    return 'right';
-  } else if (prevMove == 'down') {
-    return 'left';
-  }
-};
-
 // * This function will take in the board and determine what immediate moves are safe
 // * this will return all safe next moves for the snake
 const findSafeMoves = state => {
@@ -23,44 +10,45 @@ const findSafeMoves = state => {
     { direction: 'left', x: currHead.x - 1, y: currHead.y },
   ];
   // * Check if moves out of board bounds
-  const filterOutOfBounds = possibleMoves.filter(opt => {
-    return (
-      opt.x >= 0 &&
-      opt.x < currBoard.width &&
-      (opt.y >= 0 && opt.y < currBoard.height)
-    );
-  });
-  // * Checks if moves into own body
-  const filterOutSelf = filterOutOfBounds.filter(opt => {
-    let isBody = false;
-    currBody.forEach(bodyPos => {
-      if (bodyPos.x == opt.x && bodyPos.y == opt.y) {
-        // * Allows the snake to chase it's tail
-        if (currTail.x == opt.x && currTail.y == opt.y) {
-          isBody = false;
-        }
-        isBody = true;
-      }
-    });
-    return !isBody;
-  });
-  // * Checks if moves into others body
-  const filterOutOthers = filterOutSelf.filter(opt => {
-    let isOther = false;
-    // Get snakes that aren't itself
-    //! CAUSES SOME ISSUES
-    const otherSnakes = currBoard.snakes;
-    // Checks if moves into another snakes body
-    otherSnakes.forEach(otherSnake => {
-      otherSnake.body.forEach(bodyPos => {
+  const filterOutDangers = possibleMoves
+    .filter(opt => {
+      // * Filter out of bounds areas
+      return (
+        opt.x >= 0 &&
+        opt.x < currBoard.width &&
+        (opt.y >= 0 && opt.y < currBoard.height)
+      );
+    })
+    .filter(opt => {
+      // * Filter out the snakes own body
+      let isBody = false;
+      currBody.forEach(bodyPos => {
         if (bodyPos.x == opt.x && bodyPos.y == opt.y) {
-          isOther = true;
+          // * Allows the snake to chase it's tail
+          if (currTail.x == opt.x && currTail.y == opt.y) {
+            isBody = false;
+          }
+          isBody = true;
         }
       });
+      return !isBody;
+    })
+    .filter(opt => {
+      // * Filter out other snakes body parts
+      let isOther = false;
+      // Get snakes that aren't itself
+      const otherSnakes = currBoard.snakes;
+      // Checks if moves into another snakes body
+      otherSnakes.forEach(otherSnake => {
+        otherSnake.body.forEach(bodyPos => {
+          if (bodyPos.x == opt.x && bodyPos.y == opt.y) {
+            isOther = true;
+          }
+        });
+      });
+      return !isOther;
     });
-    return !isOther;
-  });
-  return filterOutOthers;
+  return filterOutDangers;
 };
 
 /**
@@ -73,7 +61,7 @@ const findSafeMoves = state => {
 const closestFood = state => {
   const { currHead, currBoard, currBody, currTail } = state;
   // Define Schema of food map
-  const HorizVertPositions = [];
+  const PossibleFoodPos = [];
   // Get all co-ordinates to the left, right, above, and below
   // * parse x co-ords
   for (i = 0; i < currBoard.width; i++) {
@@ -84,7 +72,7 @@ const closestFood = state => {
     } else {
       dir = 'right';
     }
-    HorizVertPositions.push({
+    PossibleFoodPos.push({
       x: i,
       y: currHead.y,
       distance: Math.abs(distanceFromHead),
@@ -100,7 +88,7 @@ const closestFood = state => {
     } else {
       dir = 'down';
     }
-    HorizVertPositions.push({
+    PossibleFoodPos.push({
       x: currHead.x,
       y: i,
       distance: Math.abs(currHead.y - i),
@@ -108,7 +96,7 @@ const closestFood = state => {
     });
   }
   // * Filter out nonFood Positions & sort by distance
-  const FoodPositions = HorizVertPositions.filter(pos => {
+  const FoodPositions = PossibleFoodPos.filter(pos => {
     let isFood = false;
     currBoard.food.forEach(foodPos => {
       if (foodPos.x == pos.x && foodPos.y == pos.y) {
@@ -129,7 +117,6 @@ const closestFood = state => {
 };
 
 module.exports = {
-  spin,
   findSafeMoves,
   closestFood,
 };

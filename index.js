@@ -9,7 +9,7 @@ const {
   poweredByHandler,
 } = require('./handlers.js');
 
-const { spin, findSafeMoves, closestFood } = require('./pathfinding.js');
+const { findSafeMoves, closestFood } = require('./pathfinding.js');
 
 // For deployment to Heroku, the port needs to be set using ENV, so
 // we check for the port number in process.env
@@ -21,7 +21,6 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(poweredByHandler);
 
-// --- SNAKE LOGIC GOES BELOW THIS LINE ---
 const state = {
   GameID: '',
   snakeName: 'FalconSnake',
@@ -61,13 +60,13 @@ app.post('/move', async (request, response) => {
   // * Pathfinding AI
   const validMoves = findSafeMoves(state);
   const foodMoves = closestFood(state);
-  let foundPreferedMove = false;
-  let preferedMove;
-  for (let i = 0; i < validMoves.length && !foundPreferedMove; i++) {
+  let foundPreferredMove = false;
+  let preferredMove;
+  for (let i = 0; i < validMoves.length && !foundPreferredMove; i++) {
     for (let z = 0; z < foodMoves.length; z++) {
       if (validMoves[i].direction == foodMoves[z].direction) {
-        preferedMove = validMoves[i].direction;
-        foundPreferedMove = true;
+        preferredMove = validMoves[i].direction;
+        foundPreferredMove = true;
       }
     }
   }
@@ -75,8 +74,8 @@ app.post('/move', async (request, response) => {
   const fallbackMove =
     validMoves[Math.floor(Math.random() * validMoves.length)].direction;
 
-  if (preferedMove) {
-    data.move = preferedMove;
+  if (preferredMove) {
+    data.move = preferredMove;
   } else {
     data.move = fallbackMove;
   }
