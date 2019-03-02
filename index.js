@@ -85,29 +85,34 @@ app.post('/move', async (request, response) => {
 
   if (preferredMove && nonRiskyMoves.includes(preferredMove)) {
     data.move = preferredMove;
-    console.log(nonRiskyMoves);
-    console.log(preferredMove);
-    console.log('Used Preferred Moves');
-    console.log(preferredMove);
   } else {
+    while (!nonRiskyMoves.includes(fallbackMove)) {
+      fallbackMove =
+        validMoves[Math.floor(Math.random() * validMoves.length)].direction;
+    }
     data.move = fallbackMove;
-    console.log('Used Fallback move');
-    console.log(fallbackMove);
   }
   // * Set Previous Move to Current Move
   state.prevMove = data.move;
   // * Return Data
   let validMovesString = '';
   let foodMovesString = '';
+  let nonRiskyMovesString = '';
   validMoves.forEach(o => {
     validMovesString += `${o.direction}, `;
   });
   foodMoves.forEach(o => {
     foodMovesString += `${o.direction}, `;
   });
+  nonRiskyMoves.forEach(o => {
+    nonRiskyMovesString += `${o}, `;
+  });
   console.log(`Current Turn: ${request.body.turn}`);
   console.log(`Valid Directions: ${validMovesString}`);
+
   console.log(`Food Directions: ${foodMovesString}`);
+
+  console.log(`Non-Risky moves: ${nonRiskyMovesString}`);
 
   return response.json(data);
 });
