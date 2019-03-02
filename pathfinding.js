@@ -34,8 +34,9 @@ const findSafeMoves = state => {
           // * Allows the snake to chase it's tail
           if (currTail.x == opt.x && currTail.y == opt.y) {
             isBody = false;
+          } else {
+            isBody = true;
           }
-          isBody = true;
         }
       });
       return !isBody;
