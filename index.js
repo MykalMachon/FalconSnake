@@ -9,7 +9,11 @@ const {
   poweredByHandler,
 } = require('./handlers.js');
 
-const { spin, findSafeMoves, closestFood } = require('./pathfinding.js');
+const {
+  findSafeMoves,
+  findClosestFood,
+  findRiskyMoves,
+} = require('./pathfinding.js');
 
 // For deployment to Heroku, the port needs to be set using ENV, so
 // we check for the port number in process.env
@@ -21,11 +25,12 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(poweredByHandler);
 
-// --- SNAKE LOGIC GOES BELOW THIS LINE ---
 const state = {
   GameID: '',
+  snakeID: '',
   snakeName: 'FalconSnake',
   snakeColor: '#B5BABE',
+  snakeLength: '',
   snakeAvatar: '',
   currBody: '',
   currBoard: '',
@@ -56,18 +61,21 @@ app.post('/move', async (request, response) => {
   // * Set new state for turn
   state.currBody = request.body.you.body;
   state.currBoard = request.body.board;
+  state.snakeID = request.body.you.id;
   state.currHead = state.currBody[0];
   state.currTail = state.currBody[state.currBody.length - 1];
+  state.snakeLength = request.body.you.length;
   // * Pathfinding AI
   const validMoves = findSafeMoves(state);
-  const foodMoves = closestFood(state);
-  let foundPreferedMove = false;
-  let preferedMove;
-  for (let i = 0; i < validMoves.length && !foundPreferedMove; i++) {
+  const nonRiskyMoves = findRiskyMoves(state);
+  const foodMoves = findClosestFood(state);
+  let foundPreferredMove = false;
+  let preferredMove;
+  for (let i = 0; i < validMoves.length && !foundPreferredMove; i++) {
     for (let z = 0; z < foodMoves.length; z++) {
       if (validMoves[i].direction == foodMoves[z].direction) {
-        preferedMove = validMoves[i].direction;
-        foundPreferedMove = true;
+        preferredMove = validMoves[i].direction;
+        foundPreferredMove = true;
       }
     }
   }
@@ -75,9 +83,13 @@ app.post('/move', async (request, response) => {
   const fallbackMove =
     validMoves[Math.floor(Math.random() * validMoves.length)].direction;
 
-  if (preferedMove) {
-    data.move = preferedMove;
+  if (preferredMove && nonRiskyMoves.includes(preferredMove)) {
+    data.move = preferredMove;
   } else {
+    while (!nonRiskyMoves.includes(fallbackMove)) {
+      fallbackMove =
+        validMoves[Math.floor(Math.random() * validMoves.length)].direction;
+    }
     data.move = fallbackMove;
   }
   // * Set Previous Move to Current Move
@@ -85,15 +97,22 @@ app.post('/move', async (request, response) => {
   // * Return Data
   let validMovesString = '';
   let foodMovesString = '';
+  let nonRiskyMovesString = '';
   validMoves.forEach(o => {
     validMovesString += `${o.direction}, `;
   });
   foodMoves.forEach(o => {
     foodMovesString += `${o.direction}, `;
   });
+  nonRiskyMoves.forEach(o => {
+    nonRiskyMovesString += `${o}, `;
+  });
   console.log(`Current Turn: ${request.body.turn}`);
   console.log(`Valid Directions: ${validMovesString}`);
+
   console.log(`Food Directions: ${foodMovesString}`);
+
+  console.log(`Non-Risky moves: ${nonRiskyMovesString}`);
 
   return response.json(data);
 });
