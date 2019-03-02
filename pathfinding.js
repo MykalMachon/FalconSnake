@@ -1,7 +1,14 @@
 // * This function will take in the board and determine what immediate moves are safe
 // * this will return all safe next moves for the snake
 const findSafeMoves = state => {
-  const { currHead, currBoard, currBody, currTail, snakeID } = state;
+  const {
+    currHead,
+    currBoard,
+    currBody,
+    currTail,
+    snakeID,
+    snakeLength,
+  } = state;
   //* Up, Right, Down, Left
   const possibleMoves = [
     { direction: 'up', x: currHead.x, y: currHead.y - 1 },
@@ -40,53 +47,9 @@ const findSafeMoves = state => {
       const otherSnakes = currBoard.snakes.filter(snake => {
         return snake.id != snakeID;
       });
-      console.log(`Other snakes ${otherSnakes}`);
       // Checks if moves into another snakes body
       otherSnakes.forEach(otherSnake => {
         otherSnake.body.forEach((bodyPos, bodyIndex) => {
-          if (bodyIndex == 0) {
-            if (possibleMoves[index].direction == 'up') {
-              console.log('up');
-              if (
-                (opt.x - 1 == bodyPos.x || opt.x + 1 == bodyPos.x) &&
-                opt.y == bodyPos.y
-              ) {
-                isOther = true;
-              } else if (opt.y - 1 == bodyPos.y && opt.x == bodyPos.x) {
-                isOther = true;
-              }
-            } else if (possibleMoves[index].direction == 'down') {
-              console.log('down');
-              if (
-                (opt.x - 1 == bodyPos.x || opt.x + 1 == bodyPos.x) &&
-                opt.y == bodyPos.y
-              ) {
-                isOther = true;
-              } else if (opt.y + 1 == bodyPos.y && opt.x == bodyPos.x) {
-                isOther = true;
-              }
-            } else if (possibleMoves[index].direction == 'right') {
-              console.log('right');
-              if (
-                (opt.y - 1 == bodyPos.y || opt.y + 1 == bodyPos.y) &&
-                opt.x == bodyPos.x
-              ) {
-                isOther = true;
-              } else if (opt.x + 1 == bodyPos.x && opt.y == bodyPos.y) {
-                isOther = true;
-              }
-            } else if (possibleMoves[index].direction == 'left') {
-              console.log('left');
-              if (
-                (opt.y - 1 == bodyPos.y || opt.y + 1 == bodyPos.y) &&
-                opt.x == bodyPos.x
-              ) {
-                isOther = true;
-              } else if (opt.x - 1 == bodyPos.x && opt.y == bodyPos.y) {
-                isOther = true;
-              }
-            }
-          }
           if (bodyPos.x == opt.x && bodyPos.y == opt.y) {
             isOther = true;
           }
@@ -95,6 +58,78 @@ const findSafeMoves = state => {
       return !isOther;
     });
   return filterOutDangers;
+};
+
+const findRiskyMoves = state => {
+  const { currHead, currBoard, snakeID, snakeLength } = state;
+
+  const possibleMoves = [
+    { direction: 'up', x: currHead.x, y: currHead.y - 1 },
+    { direction: 'right', x: currHead.x + 1, y: currHead.y },
+    { direction: 'down', x: currHead.x, y: currHead.y + 1 },
+    { direction: 'left', x: currHead.x - 1, y: currHead.y },
+  ];
+
+  const otherSnakes = currBoard.snakes.filter(snake => {
+    return snake.id != snakeID;
+  });
+
+  const preferredMoves = possibleMoves.filter(opt => {
+    let isRisky = false;
+    otherSnakes.forEach(snake => {
+      snake.body.forEach((bodyPos, bodyIndex) => {
+        if (
+          bodyIndex == 0 &&
+          findSnakeLength(bodyPos.x, bodyPos.y, currBoard) >= snakeLength
+        ) {
+          if (possibleMoves[index].direction == 'up') {
+            if (
+              (opt.x - 1 == bodyPos.x || opt.x + 1 == bodyPos.x) &&
+              opt.y == bodyPos.y
+            ) {
+              isRisky = true;
+            } else if (opt.y - 1 == bodyPos.y && opt.x == bodyPos.x) {
+              isRisky = true;
+            }
+          } else if (possibleMoves[index].direction == 'down') {
+            if (
+              (opt.x - 1 == bodyPos.x || opt.x + 1 == bodyPos.x) &&
+              opt.y == bodyPos.y
+            ) {
+              isRisky = true;
+            } else if (opt.y + 1 == bodyPos.y && opt.x == bodyPos.x) {
+              isRisky = true;
+            }
+          } else if (possibleMoves[index].direction == 'right') {
+            if (
+              (opt.y - 1 == bodyPos.y || opt.y + 1 == bodyPos.y) &&
+              opt.x == bodyPos.x
+            ) {
+              isRisky = true;
+            } else if (opt.x + 1 == bodyPos.x && opt.y == bodyPos.y) {
+              isRisky = true;
+            }
+          } else if (possibleMoves[index].direction == 'left') {
+            if (
+              (opt.y - 1 == bodyPos.y || opt.y + 1 == bodyPos.y) &&
+              opt.x == bodyPos.x
+            ) {
+              isRisky = true;
+            } else if (opt.x - 1 == bodyPos.x && opt.y == bodyPos.y) {
+              isRisky = true;
+            }
+          }
+        }
+      });
+    });
+    return !isRisky;
+  });
+  console.log('Non risky moves are :');
+  console.log(preferredMoves);
+  const directions = preferredMoves.map(move => {
+    return move.direction;
+  });
+  return directions;
 };
 
 /**
@@ -177,5 +212,6 @@ const findSnakeLength = (xPos, yPos, currBoard) => {
 
 module.exports = {
   findSafeMoves,
+  findRiskyMoves,
   findClosestFood,
 };

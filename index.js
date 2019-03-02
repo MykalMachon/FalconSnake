@@ -9,7 +9,11 @@ const {
   poweredByHandler,
 } = require('./handlers.js');
 
-const { findSafeMoves, findClosestFood } = require('./pathfinding.js');
+const {
+  findSafeMoves,
+  findClosestFood,
+  findRiskyMoves,
+} = require('./pathfinding.js');
 
 // For deployment to Heroku, the port needs to be set using ENV, so
 // we check for the port number in process.env
@@ -26,6 +30,7 @@ const state = {
   snakeID: '',
   snakeName: 'FalconSnake',
   snakeColor: '#B5BABE',
+  snakeLength: '',
   snakeAvatar: '',
   currBody: '',
   currBoard: '',
@@ -59,8 +64,10 @@ app.post('/move', async (request, response) => {
   state.snakeID = request.body.you.id;
   state.currHead = state.currBody[0];
   state.currTail = state.currBody[state.currBody.length - 1];
+  state.snakeLength = request.body.you.length;
   // * Pathfinding AI
   const validMoves = findSafeMoves(state);
+  const nonRiskyMoves = findRiskyMoves(state);
   const foodMoves = findClosestFood(state);
   let foundPreferredMove = false;
   let preferredMove;
@@ -76,10 +83,16 @@ app.post('/move', async (request, response) => {
   const fallbackMove =
     validMoves[Math.floor(Math.random() * validMoves.length)].direction;
 
-  if (preferredMove) {
+  if (preferredMove && nonRiskyMoves.includes(preferredMove)) {
     data.move = preferredMove;
+    console.log(nonRiskyMoves);
+    console.log(preferredMove);
+    console.log('Used Preferred Moves');
+    console.log(preferredMove);
   } else {
     data.move = fallbackMove;
+    console.log('Used Fallback move');
+    console.log(fallbackMove);
   }
   // * Set Previous Move to Current Move
   state.prevMove = data.move;
