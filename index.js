@@ -23,6 +23,7 @@ app.use(poweredByHandler);
 
 const state = {
   GameID: '',
+  snakeID: '',
   snakeName: 'FalconSnake',
   snakeColor: '#B5BABE',
   snakeAvatar: '',
@@ -55,6 +56,7 @@ app.post('/move', async (request, response) => {
   // * Set new state for turn
   state.currBody = request.body.you.body;
   state.currBoard = request.body.board;
+  state.snakeID = request.body.you.id;
   state.currHead = state.currBody[0];
   state.currTail = state.currBody[state.currBody.length - 1];
   // * Pathfinding AI

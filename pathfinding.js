@@ -1,7 +1,7 @@
 // * This function will take in the board and determine what immediate moves are safe
 // * this will return all safe next moves for the snake
 const findSafeMoves = state => {
-  const { currHead, currBoard, currBody, currTail, snakeName } = state;
+  const { currHead, currBoard, currBody, currTail, snakeID } = state;
   //* Up, Right, Down, Left
   const possibleMoves = [
     { direction: 'up', x: currHead.x, y: currHead.y - 1 },
@@ -33,14 +33,60 @@ const findSafeMoves = state => {
       });
       return !isBody;
     })
-    .filter(opt => {
+    .filter((opt, index) => {
       // * Filter out other snakes body parts
       let isOther = false;
       // Get snakes that aren't itself
-      const otherSnakes = currBoard.snakes;
+      const otherSnakes = currBoard.snakes.filter(snake => {
+        return snake.id != snakeID;
+      });
+      console.log(`Other snakes ${otherSnakes}`);
       // Checks if moves into another snakes body
       otherSnakes.forEach(otherSnake => {
-        otherSnake.body.forEach(bodyPos => {
+        otherSnake.body.forEach((bodyPos, bodyIndex) => {
+          if (bodyIndex == 0) {
+            if (possibleMoves[index].direction == 'up') {
+              console.log('up');
+              if (
+                (opt.x - 1 == bodyPos.x || opt.x + 1 == bodyPos.x) &&
+                opt.y == bodyPos.y
+              ) {
+                isOther = true;
+              } else if (opt.y - 1 == bodyPos.y && opt.x == bodyPos.x) {
+                isOther = true;
+              }
+            } else if (possibleMoves[index].direction == 'down') {
+              console.log('down');
+              if (
+                (opt.x - 1 == bodyPos.x || opt.x + 1 == bodyPos.x) &&
+                opt.y == bodyPos.y
+              ) {
+                isOther = true;
+              } else if (opt.y + 1 == bodyPos.y && opt.x == bodyPos.x) {
+                isOther = true;
+              }
+            } else if (possibleMoves[index].direction == 'right') {
+              console.log('right');
+              if (
+                (opt.y - 1 == bodyPos.y || opt.y + 1 == bodyPos.y) &&
+                opt.x == bodyPos.x
+              ) {
+                isOther = true;
+              } else if (opt.x + 1 == bodyPos.x && opt.y == bodyPos.y) {
+                isOther = true;
+              }
+            } else if (possibleMoves[index].direction == 'left') {
+              console.log('left');
+              if (
+                (opt.y - 1 == bodyPos.y || opt.y + 1 == bodyPos.y) &&
+                opt.x == bodyPos.x
+              ) {
+                isOther = true;
+              } else if (opt.x - 1 == bodyPos.x && opt.y == bodyPos.y) {
+                isOther = true;
+              }
+            }
+          }
           if (bodyPos.x == opt.x && bodyPos.y == opt.y) {
             isOther = true;
           }
