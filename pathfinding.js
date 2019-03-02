@@ -58,7 +58,7 @@ const findSafeMoves = state => {
  *
  * @param {*} state
  */
-const closestFood = state => {
+const findClosestFood = state => {
   const { currHead, currBoard, currBody, currTail } = state;
   // Define Schema of food map
   const PossibleFoodPos = [];
@@ -116,7 +116,20 @@ const closestFood = state => {
   return FoodPositions;
 };
 
+const findSnakeLength = (xPos, yPos, currBoard) => {
+  const isSnake = currBoard.snakes.filter(snake => {
+    let snakeAtPos = false;
+    snake.body.forEach((bodyPos, index) => {
+      if (bodyPos.x == xPos && bodyPos.y == yPos) {
+        snakeAtPos = snake.body;
+      }
+    });
+    return snakeAtPos;
+  });
+  return isSnake[0].body.length;
+};
+
 module.exports = {
   findSafeMoves,
-  closestFood,
+  findClosestFood,
 };

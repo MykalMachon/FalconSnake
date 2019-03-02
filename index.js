@@ -9,7 +9,7 @@ const {
   poweredByHandler,
 } = require('./handlers.js');
 
-const { findSafeMoves, closestFood } = require('./pathfinding.js');
+const { findSafeMoves, findClosestFood } = require('./pathfinding.js');
 
 // For deployment to Heroku, the port needs to be set using ENV, so
 // we check for the port number in process.env
@@ -59,7 +59,7 @@ app.post('/move', async (request, response) => {
   state.currTail = state.currBody[state.currBody.length - 1];
   // * Pathfinding AI
   const validMoves = findSafeMoves(state);
-  const foodMoves = closestFood(state);
+  const foodMoves = findClosestFood(state);
   let foundPreferredMove = false;
   let preferredMove;
   for (let i = 0; i < validMoves.length && !foundPreferredMove; i++) {
